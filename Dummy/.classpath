@@ -4,3 +4,132 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
+
+
+//Iservice
+
+
+public boolean validateName(String name) throws PaymentWalletException;
+
+	public boolean validateEmail(String email) throws PaymentWalletException;
+
+	public boolean validateMobileNumber(String mobileNumber) throws PaymentWalletException;
+
+	public boolean validateAmount(String amount) throws PaymentWalletException;
+
+	public String createAccount(Customer customer);
+
+	public Customer depositAmount(String mobileNumber, String tempDepositAmt);
+
+	public Customer withdrawAmount(String mobileNumber, String tempWithdrawAmt) throws PaymentWalletException;
+
+	public Customer checkMobileNumber(String mobileNumber);
+
+	public long checkBalance(String mobileNumber);
+
+	public Map<String, Customer> printTransaction(String mobileNumber);
+
+	public List<Customer> fundTransfer(String senderMobileNumber, String receiverMobileNumber, String amount)
+			throws PaymentWalletException;
+		
+		
+		
+		
+		
+SERVICE
+		
+		
+		
+		package com.cg.paymentwallet.service;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+import com.cg.paymentwallet.dao.IPaymentWalletDao;
+import com.cg.paymentwallet.dao.PaymentWalletDaoImpl;
+import com.cg.paymentwallet.dto.Customer;
+import com.cg.paymentwallet.exception.IPaymentWalletException;
+import com.cg.paymentwallet.exception.PaymentWalletException;
+
+public class PaymentWalletServiceImpl implements IPaymentWalletService {
+
+	IPaymentWalletDao dao = null;
+
+	public PaymentWalletServiceImpl() {
+		dao = new PaymentWalletDaoImpl();
+	}
+
+	public String createAccount(Customer customer) {
+		dao.createAccount(customer);
+		return customer.getMobileNumber();
+	}
+
+	public Customer depositAmount(String mobileNumber, String depositAmount) {
+		Customer updatedBalance = null;
+		updatedBalance = dao.depositAmount(mobileNumber, depositAmount);
+		return updatedBalance;
+	}
+
+	public Customer withdrawAmount(String mobileNumber, String tempWithdrawAmt) throws PaymentWalletException {
+		Customer remainingBalance = null;
+		remainingBalance = dao.withdrawAmount(mobileNumber, tempWithdrawAmt);
+		return remainingBalance;
+	}
+
+	public long checkBalance(String mobileNumber) {
+		return dao.checkBalance(mobileNumber);
+	}
+
+	public List<Customer> fundTransfer(String senderMobileNumber, String receiverMobileNumber, String amount)
+			throws PaymentWalletException {
+		List<Customer> updatedBalnceList = null;
+		updatedBalnceList = dao.fundTransfer(senderMobileNumber, receiverMobileNumber, amount);
+		return updatedBalnceList;
+	}
+
+	public Map<String, Customer> printTransaction(String mobileNumber) {
+		return dao.printTransaction(mobileNumber);
+	}
+
+	public Customer checkMobileNumber(String mobileNumber) {
+		Customer searchResult = null;
+		searchResult = dao.checkMobileNumber(mobileNumber);
+		return searchResult;
+	}
+
+	public boolean validateName(String name) throws PaymentWalletException {
+		boolean result = true;
+		String tempName = name.trim();
+
+		if (!(tempName.replaceAll("\\s+", "").matches("^[A-Za-z]*$"))) {
+			throw new PaymentWalletException(IPaymentWalletException.MESSAGE2);
+		}
+		return result;
+	}
+
+	public boolean validateEmail(String email) throws PaymentWalletException {
+		boolean result = true;
+		if (!(email.trim().matches("^[A-Za-z]{1}[A-Za-z0-9_.]{1,}[@]{1}[A-Za-z0-9]{1,}[.]{1}[A-Za-z]{2,3}$"))) {
+			throw new PaymentWalletException(IPaymentWalletException.MESSAGE3);
+		}
+		return result;
+	}
+
+	public boolean validateMobileNumber(String mobileNumber) throws PaymentWalletException {
+		boolean result = true;
+		if (!(mobileNumber.trim().length() == 10 && mobileNumber.trim().matches("^[0-9]+$"))) {
+			throw new PaymentWalletException(IPaymentWalletException.MESSAGE1);
+		}
+		return result;
+	}
+
+	public boolean validateAmount(String amount) throws PaymentWalletException {
+		boolean result = true;
+		if (!(amount.trim().matches("^[0-9.]+$"))) {
+			throw new PaymentWalletException(IPaymentWalletException.MESSAGE4);
+		}
+		return result;
+	}
+
+}
